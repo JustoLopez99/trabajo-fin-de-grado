@@ -75,17 +75,22 @@ La plataforma permitirá el registro manual de métricas de cada publicación y 
 ## 🛠️ Tecnologías a Utilizar  
 
 ### 🌐 Frontend  
-- 🎨 **HTML, CSS, JavaScript**: Desarrollo de la interfaz.  
-- 🖌️ **Framework CSS (Bootstrap o Tailwind)**: Para un diseño moderno y responsivo.  
-- 📊 **Gráficos (Chart.js, D3.js)**: Visualización de métricas.  
+- 🎨 **React.js** para el desarrollo de la interfaz web. 
+- 🖌️ **Tailwind CSS** para el diseño y estilos responsivos.
+- 📊 **Gráficos (Chart.js, D3.js)**: Visualización de métricas.
+- **React Native** para el desarrollo de la aplicación móvil.
 
 ### 🖥️ Backend  
-- 🐍 **Python (Flask/Django)** o 🐘 **PHP**: Lógica de negocio y gestión de datos.  
+- 🐍 **Node.js con Express.js** para manejar las solicitudes y la lógica del negocio.
+- 
 
 ### 🗄️ Base de Datos  
-- 🛢️ **MySQL o PostgreSQL**: Almacenamiento de campañas y métricas.  
+- 🛢️ **PostgreSQL**: Almacenamiento de campañas y métricas.  
 - 🖥️ **DBeaver**: Para administración y visualización de datos.  
 
 ### 🔒 Autenticación y Seguridad  
-- 🔑 **JWT (JSON Web Token)** o **PHP Sessions** para autenticación segura.  
+- 🔑 **JWT (JSON Web Token)** para una gestión segura de sesiones de usuario.
+
+### Infraestructura y contenedores
+- **Docker y Docker Compose** para contenerizar la aplicación web, el backend y la base de datos, asegurando portabilidad y escalabilidad.
 
