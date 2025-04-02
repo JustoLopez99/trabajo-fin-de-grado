@@ -1,6 +1,6 @@
 # 📌 Trabajo Final de Grado: Aplicación Web para Gestión de Campañas de Marketing Digital  
 
-# Nombre de la página: **StrakWave**
+# Nombre de la página: **StrackWave**
 
 ## 📖 Introducción  
 Se propone el desarrollo de una aplicación web para la gestión de campañas de marketing digital, permitiendo a los administradores (agencias de marketing) y clientes (empresas) organizar y analizar sus estrategias publicitarias.  
