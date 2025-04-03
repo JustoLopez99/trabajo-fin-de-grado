@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend  # Carpeta donde está el Dockerfile para el frontend
+    ports:
+      - "3001:3000"  # Exponemos el puerto 3001 del contenedor al 3000 del host
+    volumes:
+      - ./frontend:/app  # Volumen para facilitar el desarrollo
+    depends_on:
+      - backend  # Asegura que el frontend se inicie después del backend
+    networks:
+      - app-network  # Conectamos el frontend a la red app-network
+
+  backend:
+    build: ./backend  # Carpeta donde está el Dockerfile para el backend
+    ports:
+      - "3000:3000"  # Exponemos el puerto 3000 del contenedor al 3000 del host
+    volumes:
+      - ./backend:/app  # Volumen para facilitar el desarrollo
+    environment:
+        - DATABASE_URL=postgres://postgres:password@trabajo-fin-de-grado-postgres-1:5432/strackwave_db
+    depends_on:
+      - postgres  # Asegura que el backend se inicie después de la base de datos
+    networks:
+      - app-network  # Conectamos el backend a la red app-network
+
+  postgres:
+    image: postgres:latest  # Usamos la imagen oficial de PostgreSQL
+    environment:
+      POSTGRES_DB: strackwave_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"  # Exponemos el puerto de PostgreSQL
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistir datos de la base de datos
+    networks:
+      - app-network  # Conectamos el contenedor de PostgreSQL a la red app-network
+
+volumes:
+  postgres_data:  # Volumen para almacenar los datos de PostgreSQL
+
+networks:
+  app-network:  # Definimos una red personalizada para los contenedores
+    driver: bridge
