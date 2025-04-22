@@ -1,5 +1,5 @@
 # Usamos una imagen oficial de Node.js como base para el frontend
-FROM node:16
+FROM node:16 AS build
 
 # Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
@@ -16,8 +16,17 @@ COPY . .
 # Creamos la versión de producción de la aplicación React
 RUN npm run build
 
-# Exponemos el puerto en el que React servirá la aplicación
+# Ahora vamos a crear el contenedor para servir la aplicación en producción
+FROM nginx:alpine
+
+# Copiamos los archivos generados por `npm run build` al directorio de Nginx
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Copiamos el archivo de configuración de Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Exponemos el puerto 3001 de Nginx (en lugar de 80)
 EXPOSE 3001
 
-# Comando para iniciar el servidor de desarrollo de React
-CMD ["npm", "start"]
+# Iniciamos el servidor Nginx
+CMD ["nginx", "-g", "daemon off;"]

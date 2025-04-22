@@ -19,7 +19,7 @@ services:
     volumes:
       - ./backend:/app  # Volumen para facilitar el desarrollo
     environment:
-        - DATABASE_URL=postgres://postgres:password@trabajo-fin-de-grado-postgres-1:5432/strackwave_db
+        - DATABASE_URL=postgres://postgres:password@postgres:5432/strackwave_db
     depends_on:
       - postgres  # Asegura que el backend se inicie después de la base de datos
     networks:
@@ -32,7 +32,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"  # Exponemos el puerto de PostgreSQL
+      - "5435:5432"  # Exponemos el puerto de PostgreSQL
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Persistir datos de la base de datos
     networks:

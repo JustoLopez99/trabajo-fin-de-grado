@@ -16,12 +16,6 @@ RUN apt-get update && apt-get install -y netcat postgresql-client
 # Copia el resto de los archivos del proyecto al contenedor
 COPY . .
 
-# Copia el script wait-for-it.sh al contenedor
-COPY wait-for-it.sh /app/wait-for-it.sh
-
-# Da permisos de ejecución al script
-RUN chmod +x /app/wait-for-it.sh
-
 # Expone el puerto que la aplicación usará (por ejemplo, el puerto 3000)
 EXPOSE 3000
 
