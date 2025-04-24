@@ -1,0 +1,126 @@
+/* ===== Estilo general de la página ===== */
+.register-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: sans-serif;
+}
+
+/* ===== Parte superior: banner con logo y nombre de la app ===== */
+.top-banner {
+  background-color: #FFFFFF;
+  height: 7vh;
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+  color: black;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 30;
+}
+
+/* Imagen del logo en el banner superior */
+.logo-img {
+  height: 70px;
+  margin-right: 1rem;
+}
+
+/* Nombre de la aplicación en el banner */
+.app-name {
+  font-size: 2rem;
+  font-weight: 100;
+}
+
+/* ===== Parte media: sección de registro ===== */
+.middle-section {
+  position: relative;
+  height: 68vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Imagen de fondo */
+.background-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  opacity: 0.5;
+}
+
+/* Contenedor del formulario de registro */
+.register-form-box {
+  background-color: rgba(119, 136, 153, 0.6); 
+  z-index: 2;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  width: 300px;
+}
+
+/* Estilo de los inputs del formulario */
+.register-form-box input {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 5px;
+}
+
+/* Estilo del botón de registro */
+.register-form-box button {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.6rem;
+  background-color: white;
+  border: none;
+  border-radius: 5px;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Efecto hover del botón de registro */
+.register-form-box button:hover {
+  background-color: #708090;
+}
+
+/* Enlace a la página de login */
+.register-link {
+  margin-top: 1rem;
+  color: white;
+  font-size: 0.85rem; 
+}
+
+/* ===== Parte inferior: carrusel e información de contacto ===== */
+.bottom-section {
+  display: flex;
+  flex-direction: row;
+  background-color: #FFFFFF;
+  height: 25vh;
+}
+
+/* Sección del carrusel de imágenes */
+.carousel-section {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* 🔹 Asegura que use toda la altura disponible */
+}
+
+/* Imagen dentro del carrusel */
+.carousel-img {
+  max-height: 100%; /* 🔹 Limita la altura al 100% del contenedor */
+  width: auto;
+  object-fit: contain;
+}
+
+/* Sección de contacto / información adicional */
+.contact-section {
+  flex: 1;
+  padding: 2rem;
+}

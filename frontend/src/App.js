@@ -1,63 +1,52 @@
 // src/App.js
 import React from 'react';
-import './App.css';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'; 
-import Datos from './Datos';  // Importa el componente Datos 
-import Register from './components/Register';  // Importa el componente de registro
-import Login from './components/Login';  // Importa el componente de inicio de sesión
-import Principal from './components/Principal';  // Importa el componente de la página principal
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Register from './components/Register';
+import Login from './components/Login';
+import Principal from './components/Principal';
+import Datos from './components/Datos';
+import Calendario from './components/Calendario';
+import Estadisticas from './components/Estadisticas';
+import Predicciones from './components/Predicciones';
+import PrivateRoute from './components/PrivateRoute';
 
-function App() {
-  // Verifica si el usuario está autenticado mirando si hay un token en el localStorage
-  const isAuthenticated = !!localStorage.getItem('token'); // Si hay un token, el usuario está autenticado
-
+const App = () => {
   return (
-    <Router>
-      <div className="App">
-        <header className="App-header">
-          <h1>Mi Aplicación de Marketing Digital</h1>
-          <p>Bienvenido al sistema de gestión de campañas de marketing.</p>
-        </header>
+    <div className="App">
+      <main>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
 
-        <nav>
-          <ul>
-            <li>
-              <Link to="/register">Registrar Usuario</Link>
-            </li>
-            <li>
-              <Link to="/login">Iniciar Sesión</Link>
-            </li>
-            <li>
-              <Link to="/datos">Ver Datos</Link>
-            </li>
-            <li>
-              {/* Solo muestra el link a la página principal si el usuario está autenticado */}
-              {isAuthenticated && <Link to="/principal">Página Principal</Link>}
-            </li>
-          </ul>
-        </nav>
+          {/* Rutas protegidas con PrivateRoute */}
+          <Route path="/principal" element={
+            <PrivateRoute><Principal /></PrivateRoute>
+          } />
+          <Route path="/datos" element={
+            <PrivateRoute><Datos /></PrivateRoute>
+          } />
+          <Route path="/calendario" element={
+            <PrivateRoute><Calendario /></PrivateRoute>
+          } />
+          <Route path="/estadisticas" element={
+            <PrivateRoute><Estadisticas /></PrivateRoute>
+          } />
+          <Route path="/predicciones" element={
+            <PrivateRoute><Predicciones /></PrivateRoute>
+          } />
 
-        <main>
-          <Routes>
-            {/* Rutas para los componentes */}
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/datos" element={<Datos />} />
-            
-            {/* Ruta para la página principal */}
-            {/* Si el usuario no está autenticado, redirige al login */}
-            <Route 
-              path="/principal" 
-              element={isAuthenticated ? <Principal /> : <Navigate to="/login" />} 
-            />
-            
-            {/* Ruta por defecto que redirige al login */}
-            <Route path="/" element={<Login />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+          {/* Ruta por defecto */}
+          <Route path="*" element={<Login />} />
+        </Routes>
+      </main>
+    </div>
   );
-}
+};
 
-export default App;
+const AppWithRouter = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default AppWithRouter;
