@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './Register.css'; // Importa los estilos personalizados del componente Register
@@ -16,6 +16,34 @@ const Register = () => {
   // Estado para almacenar errores y mensajes
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+
+  //  Estado y lógica para el carrusel de imágenes
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = [
+    "/icons/imagen1.jpg",
+    "/icons/imagen2.jpg",
+    "/icons/imagen3.jpg",
+    "/icons/imagen4.jpg"
+  ];
+
+  //  Cambia la imagen automáticamente cada 3 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleNext(); // Usa la lógica de flecha derecha
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  //  Funciones para navegación manual
+  const handlePrev = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? images.length - 1 : prev - 1
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
 
   // Maneja los cambios en los campos del formulario
   const handleChange = (e) => {
@@ -52,13 +80,13 @@ const Register = () => {
     <div className="register-page">
       {/* Parte superior: banner con logo y nombre de la app */}
       <div className="top-banner">
-        <img src="/Logo.png" alt="Logo" className="logo-img" /> {/* Logo */}
+        <img src="/icons/Logo.png" alt="Logo" className="logo-img" /> {/* Logo */}
         <h1 className="app-name">STRACKWAVE</h1> {/* Nombre de la app */}
       </div>
 
       {/* Parte media: formulario de registro */}
       <div className="middle-section">
-        <img src="/fondo.png" alt="Fondo" className="background-img" /> {/* Imagen de fondo */}
+        <img src="/icons/fondo.png" alt="Fondo" className="background-img" /> {/* Imagen de fondo */}
         <div className="register-form-box">
           <h2>Registro de Usuario</h2> {/* Título del formulario */}
           {/* Mostrar mensajes de éxito o error */}
@@ -120,7 +148,9 @@ const Register = () => {
       {/* Parte inferior: carrusel e información de contacto */}
       <div className="bottom-section">
         <div className="carousel-section">
-          <img src="/imagen1.jpg" alt="Imagen 1" className="carousel-img" /> {/* Imagen en el carrusel */}
+          <button className="carousel-button left" onClick={handlePrev}>❮</button>
+          <img src={images[currentImageIndex]} alt="Imagen carrusel" className="carousel-img" /> {/* Imagen en el carrusel */}
+          <button className="carousel-button right" onClick={handleNext}>❯</button>
         </div>
         <div className="contact-section">
           <h3>Contacto</h3>

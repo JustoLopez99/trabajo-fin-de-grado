@@ -109,14 +109,37 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%; /* 🔹 Asegura que use toda la altura disponible */
+  height: 100%;
 }
 
 /* Imagen dentro del carrusel */
 .carousel-img {
-  max-height: 100%; /* 🔹 Limita la altura al 100% del contenedor */
+  max-height: 100%;
   width: auto;
   object-fit: contain;
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Botones de navegación del carrusel */
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.7);
+  border: none;
+  font-size: 2rem;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  z-index: 3;
+  border-radius: 50%;
+}
+
+.carousel-button.left {
+  left: 10px;
+}
+
+.carousel-button.right {
+  right: 10px;
 }
 
 /* Sección de contacto / información adicional */

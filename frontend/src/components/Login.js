@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // Hook para manejar el estado
+import React, { useState, useEffect } from 'react'; // Hook para manejar el estado y efectos
 import axios from 'axios'; // Cliente HTTP para hacer peticiones al backend
 import { useNavigate, Link } from 'react-router-dom'; // Navegación y enlaces
 import './login.css'; // Estilos personalizados del componente Login
@@ -13,6 +13,36 @@ const Login = () => {
   const [error, setError] = useState(''); // Estado para almacenar errores
   const [message, setMessage] = useState(''); // Estado para almacenar mensajes de éxito
   const navigate = useNavigate(); // Hook para la navegación
+
+  //  Estado y lógica para el carrusel de imágenes
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Índice de la imagen actual
+  const images = [
+    "/icons/imagen1.jpg",
+    "/icons/imagen2.jpg",
+    "/icons/imagen3.jpg",
+    "/icons/imagen4.jpg"
+  ];
+
+  //  Cambia la imagen automáticamente cada 3 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleNext(); // Usa la misma lógica de la flecha derecha
+    }, 3000);
+
+    return () => clearInterval(interval); // Limpia el intervalo al desmontar
+  }, []);
+
+  //  Función para ir a la imagen anterior
+  const handlePrev = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
+
+  //  Función para ir a la imagen siguiente
+  const handleNext = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
 
   // Función que maneja los cambios en los campos de entrada
   const handleChange = (e) => {
@@ -51,12 +81,12 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="top-banner">
-        <img src="/Logo.png" alt="Logo" className="logo-img" /> {/* Muestra el logo */}
+        <img src="/icons/Logo.png" alt="Logo" className="logo-img" /> {/* Muestra el logo */}
         <h1 className="app-name">STRACKWAVE</h1> {/* Título de la aplicación */}
       </div>
 
       <div className="middle-section">
-        <img src="/fondo.png" alt="Fondo" className="background-img" /> {/* Imagen de fondo */}
+        <img src="/icons/fondo.png" alt="Fondo" className="background-img" /> {/* Imagen de fondo */}
         <div className="login-form-box">
           <h2>Iniciar Sesión</h2>
           {/* Muestra mensajes de éxito o error */}
@@ -91,7 +121,14 @@ const Login = () => {
 
       <div className="bottom-section">
         <div className="carousel-section">
-          <img src="/imagen1.jpg" alt="Imagen 1" className="carousel-img" /> {/* Imagen en el carrusel */}
+          {/* 🔹 Flechas izquierda y derecha para navegación manual */}
+          <button className="carousel-button left" onClick={handlePrev}>❮</button>
+          <img
+            src={images[currentImageIndex]}
+            alt={`Imagen ${currentImageIndex + 1}`}
+            className="carousel-img"
+          />
+          <button className="carousel-button right" onClick={handleNext}>❯</button>
         </div>
         <div className="contact-section">
           <h3>Contacto</h3>
