@@ -1,11 +1,17 @@
+// src/components/Estadisticas.js
 import React from 'react';
+import { useOutletContext } from 'react-router-dom';
 
 const Estadisticas = () => {
+  const { fullName } = useOutletContext();
+
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>📊 Estadísticas</h2>
-      <p>Consulta aquí tus estadísticas de uso y rendimiento.</p>
-    </div>
+    <>
+      <img src="/icons/fondo.png" alt="Fondo Estadísticas" className="background-img" />
+      <div className="welcome-text">
+        <h2>Hola {fullName}, aquí puedes ver tus estadísticas</h2>
+      </div>
+    </>
   );
 };
 

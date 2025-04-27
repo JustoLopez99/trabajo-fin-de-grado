@@ -1,11 +1,17 @@
+// src/components/Predicciones.js
 import React from 'react';
+import { useOutletContext } from 'react-router-dom';
 
 const Predicciones = () => {
+  const { fullName } = useOutletContext();
+
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>🔮 Predicciones</h2>
-      <p>Visualiza aquí las predicciones generadas a partir de tus datos.</p>
-    </div>
+    <>
+      <img src="/icons/fondo.png" alt="Fondo Predicciones" className="background-img" />
+      <div className="welcome-text">
+        <h2>Hola {fullName}, consulta tus predicciones</h2>
+      </div>
+    </>
   );
 };
 

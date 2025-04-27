@@ -1,0 +1,171 @@
+/* ===== Estructura general de toda la página principal ===== */
+.principal-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: sans-serif;
+}
+
+/* ===== Cabecera superior ===== */
+.top-banner {
+  background-color: #FFFFFF;
+  height: 7vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  color: black;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.top-banner-left {
+  display: flex;
+  align-items: center;
+}
+
+.top-banner-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-img {
+  height: 70px;
+  margin-right: 1rem;
+}
+
+.app-name {
+  font-size: 2rem;
+  font-weight: 100;
+}
+
+.link-no-style {
+  text-decoration: none;
+  color: inherit;
+}
+
+.logout-button {
+  background-color: #708090;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #556070;
+}
+
+/* ===== Contenido principal (sidebar + contenido) ===== */
+.main-content {
+  display: flex;
+  flex: 1;
+  height: 93vh;
+}
+
+.sidebar {
+  width: 200px;
+  background-color: #2f4f4f;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.sidebar li {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.sidebar a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Contenedor del icono y texto */
+.sidebar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Íconos */
+.sidebar-icon {
+  width: 100px;
+  height: 100px;
+  transition: transform 0.3s;
+}
+
+.sidebar-item:hover .sidebar-icon {
+  transform: scale(1.1);
+}
+
+/* Texto debajo del icono */
+.sidebar-label {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #ffffff;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.sidebar-item:hover .sidebar-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Área de contenido */
+.content-area {
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fondo */
+.background-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+/* Texto de bienvenida */
+.welcome-text {
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+}
