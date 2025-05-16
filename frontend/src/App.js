@@ -20,7 +20,7 @@ const App = () => {
       <main>
         <Routes>
           {/* Rutas públicas */}
-          <Route path="/" element={<Index />} /> {/* 👈 Esta es la portada o index */}
+          <Route path="/" element={<Index />} /> 
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
 

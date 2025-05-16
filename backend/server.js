@@ -10,6 +10,8 @@ const cors = require('cors');
 
 // Importa las rutas de usuario
 const userRoutes = require('./routes/userRoutes');
+const  calendarioRoutes = require('./routes/calendarioRoutes');
+const  datosRoutes = require('./routes/datosRoutes');
 
 const port = 3000; // Puerto donde se ejecutará el servidor
 
@@ -55,6 +57,13 @@ app.use('/api/users', (req, res, next) => {
 app.get('/', (req, res) => {
   res.send('¡Hola desde el backend!');
 });
+
+// Para el calendario
+app.use('/api', calendarioRoutes);
+
+
+// Para datos
+app.use('/api', datosRoutes);
 
 // Inicia el servidor en el puerto definido
 app.listen(port, () => {
