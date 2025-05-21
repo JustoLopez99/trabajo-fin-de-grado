@@ -24,15 +24,15 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
+    setError(''); // Limpiar errores previos al iniciar un nuevo envío
+    setMessage(''); // Limpiar mensajes previos al iniciar un nuevo envío
 
     const payload = {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      first_name: formData.name,
-      last_name: formData.surname
+      first_name: formData.name, // Asegúrate que el backend espera 'first_name'
+      last_name: formData.surname  // Asegúrate que el backend espera 'last_name'
     };
 
     if (formData.password.length < 6) {
@@ -41,6 +41,7 @@ const Register = () => {
     }
 
     try {
+      // eslint-disable-next-line no-unused-vars
       const response = await axios.post('http://localhost:3000/api/users/register', payload);
       setMessage('¡Registro exitoso! Redirigiendo al login...');
       setFormData({ username: '', email: '', password: '', name: '', surname: '' }); // Limpiar formulario
@@ -49,7 +50,10 @@ const Register = () => {
       }, 2000); // Retraso para que el usuario vea el mensaje
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+        // No se establece ningún error aquí.
+        // Esto significa que cualquier mensaje de error proveniente de err.response.data.message
+        // (incluyendo "username repetido" u otros errores de validación del backend)
+        // no se mostrará al usuario.
       } else if (err.request) {
         setError('No se pudo conectar al servidor. Verifica tu conexión.');
       } else {
@@ -58,18 +62,12 @@ const Register = () => {
     }
   };
 
-  // Clases de Tailwind para los inputs y el botón del formulario, basadas en el CSS original
-  // .form-box input: display: block; width: 100%; margin: 0.5rem 0; padding: 0.5rem; border: none; border-radius: 5px;
+  // Clases de Tailwind para los inputs y el botón del formulario
   const formInputClasses = "block w-full my-2 p-2 border-none rounded-[5px] bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400";
-  // .form-box button: margin-top: 1rem; width: 100%; padding: 0.6rem; background-color: white; border: none; border-radius: 5px; color: black; font-weight: bold; cursor: pointer;
-  // .form-box button:hover: background-color: #708090; (y color: white para contraste)
   const formButtonClasses = "mt-4 w-full p-[0.6rem] bg-white border-none rounded-[5px] text-black font-bold cursor-pointer hover:bg-[#708090] hover:text-white transition-colors duration-150 ease-in-out";
 
   return (
     <Estilo> {/* Usa el layout general Estilo.js */}
-      {/* Este es el contenido que se pasará como {children} a Estilo.js */}
-      {/* El div de Estilo.js con 'children' ya tiene 'relative z-10 p-4', así que este form-box se renderizará dentro */}
-      {/* .form-box */}
       <div className="bg-[#778899]/60 p-8 rounded-[10px] text-center w-full max-w-[350px] sm:max-w-[400px] shadow-xl mx-auto">
         <h2 className="text-3xl font-semibold text-white mb-6 [text-shadow:1px_1px_2px_rgba(0,0,0,0.4)]">
           Crear Cuenta

@@ -12,7 +12,8 @@ import Calendario from './components/Calendario';
 import Estadisticas from './components/Estadisticas';
 import Predicciones from './components/Predicciones';
 import PrivateRoute from './components/PrivateRoute';
-import Layout from './components/Layout'; // Nuevo layout que contiene la estructura fija
+import Layout from './components/Layout'; // contiene la estructura fija
+import AdminUserManagement from './components/AdminUserManagement'; // Asegúrate de crear este archivo
 
 const App = () => {
   return (
@@ -20,7 +21,7 @@ const App = () => {
       <main>
         <Routes>
           {/* Rutas públicas */}
-          <Route path="/" element={<Index />} /> 
+          <Route path="/" element={<Index />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
 
@@ -31,9 +32,12 @@ const App = () => {
             <Route path="/calendario" element={<Calendario />} />
             <Route path="/estadisticas" element={<Estadisticas />} />
             <Route path="/predicciones" element={<Predicciones />} />
+            {/* Nueva ruta para la gestión de usuarios */}
+            <Route path="/admin/user-management" element={<AdminUserManagement />} />
           </Route>
 
           {/* Ruta catch-all: cualquier otra URL redirige al login */}
+          {/* Es mejor redirigir a una página 404 o a la principal si está logueado */}
           <Route path="*" element={<Login />} />
         </Routes>
       </main>

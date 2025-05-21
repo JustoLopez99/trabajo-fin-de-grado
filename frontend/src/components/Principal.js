@@ -1,246 +1,269 @@
-// Importa las dependencias necesarias de React y otras bibliotecas.
+// src/components/Principal.js
 import React, { useState, useEffect, useCallback } from 'react';
-// Importa el hook para acceder al contexto proporcionado por Outlet en React Router.
 import { useOutletContext } from 'react-router-dom';
-// Importa la biblioteca Axios para realizar peticiones HTTP.
 import axios from 'axios';
 
-// Define el componente funcional Principal.
 const Principal = () => {
-    // Obtiene el 'username' del contexto proporcionado por el Outlet de React Router.
-    const { username } = useOutletContext();
-    // Define el estado 'currentMonth' para almacenar la fecha del mes actual, inicializado con la fecha de hoy.
-    const [currentMonth, setCurrentMonth] = useState(new Date());
-    // Define el estado 'tasks' para almacenar la lista de tareas obtenidas, inicializado como un array vacío.
-    const [tasks, setTasks] = useState([]);
-    // Define el estado 'isLoading' para controlar la visualización de un indicador de carga.
-    const [isLoading, setIsLoading] = useState(false);
-    // Define el estado 'error' para almacenar mensajes de error si ocurren durante la carga de datos.
-    const [error, setError] = useState(null);
+    // Obtener username del usuario logueado, su rol, y el username que el admin podría estar viendo
+    const { username, userRole, viewingAsUsername } = useOutletContext() || {}; // Proporcionar un objeto vacío por defecto
 
-    // Define una función asíncrona 'fetchTasks' para obtener las tareas, memoizada con useCallback.
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [tasks, setTasks] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [viewMode, setViewMode] = useState('month'); // 'month' (mes) o 'week' (semana)
+    const [currentWeekIndex, setCurrentWeekIndex] = useState(0); // Índice de la semana actual en la vista semanal
+
+    // Determina el username efectivo para la carga de datos
+    const getEffectiveUsername = useCallback(() => {
+        if (userRole === 'admin' && viewingAsUsername) {
+            return viewingAsUsername;
+        }
+        return username; // Username del usuario logueado (cliente o admin viendo su propio perfil)
+    }, [userRole, username, viewingAsUsername]);
+
+    // Obtiene las tareas para el mes y usuario efectivos
     const fetchTasks = useCallback(async () => {
-        // Verifica si el 'username' está disponible antes de proceder.
-        if (!username) {
-            // Imprime un mensaje en consola si el username aún no está disponible.
-            console.log("Esperando nombre de usuario...");
-            // Vacía la lista de tareas si no hay username.
-            setTasks([]);
-            // Termina la ejecución de la función si no hay username.
+        const usernameToFetch = getEffectiveUsername(); // Usar el username efectivo
+        if (!usernameToFetch) {
+            setTasks([]); // Limpiar tareas si no hay usuario efectivo
             return;
         }
-
-        // Establece el estado 'isLoading' a true para mostrar el indicador de carga.
         setIsLoading(true);
-        // Resetea el estado 'error' a null al iniciar una nueva petición.
         setError(null);
-        // Obtiene el año completo del estado 'currentMonth'.
         const year = currentMonth.getFullYear();
-        // Obtiene el mes del estado 'currentMonth' (0 para Enero, 11 para Diciembre).
-        const month = currentMonth.getMonth();
-
-        // Imprime en consola los datos con los que se realizará la petición (para depuración).
-        console.log(`Workspaceing tasks for: ${username}, Year: ${year}, Month: ${month}`);
-
-        // Inicia un bloque try-catch para manejar posibles errores durante la petición HTTP.
+        const month = currentMonth.getMonth(); // 0 para Enero, 11 para Diciembre
+        console.log(`Principal: Buscando tareas para usuario efectivo: ${usernameToFetch}, Año: ${year}, Mes: ${month}`);
         try {
-            // Realiza una petición GET a la API de tareas usando axios.
             const response = await axios.get(`http://localhost:3000/api/tasks`, {
-                // Pasa los parámetros 'username', 'year' y 'month' en la query string de la URL.
-                params: {
-                    username: username,
-                    year: year,
-                    month: month // Parámetro 'month' enviado al backend (formato 0-11).
-                },
-                // Establece un tiempo máximo de espera para la respuesta de la petición (10 segundos).
-                timeout: 10000
+                params: { username: usernameToFetch, year, month }, // Enviar el username efectivo
+                timeout: 10000 // Tiempo máximo de espera
             });
-            // Imprime en consola los datos recibidos de la API (para depuración).
-            console.log("Tasks received:", response.data);
-            // Actualiza el estado 'tasks' con los datos recibidos (o un array vacío si no hay datos).
-            setTasks(response.data || []);
-        // Captura cualquier error que ocurra durante la petición.
+            setTasks(response.data || []); // Establecer tareas o array vacío si no hay datos
         } catch (error) {
-            // Imprime el error detallado en la consola.
-            console.error('Error al obtener tareas:', error);
-            // Establece un mensaje de error en el estado 'error' para mostrar al usuario.
+            console.error('Principal: Error al obtener tareas:', error);
             setError('No se pudieron cargar las tareas. Inténtalo de nuevo más tarde.');
-            // Vacía la lista de tareas en caso de error.
-            setTasks([]);
-        // El bloque finally se ejecuta siempre, haya habido error o no.
+            setTasks([]); // Limpiar tareas en caso de error
         } finally {
-            // Establece el estado 'isLoading' a false para ocultar el indicador de carga.
             setIsLoading(false);
         }
-    // Define las dependencias de useCallback: la función se recreará si 'username' o 'currentMonth' cambian.
-    }, [username, currentMonth]);
+    }, [currentMonth, getEffectiveUsername]); // Dependencias de useCallback
 
-    // Hook useEffect que se ejecuta cuando el componente se monta y cada vez que 'fetchTasks' cambia.
+    // Efecto para llamar a fetchTasks cuando cambian sus dependencias
     useEffect(() => {
-        // Llama a la función 'fetchTasks' para obtener las tareas.
         fetchTasks();
-    // La dependencia es 'fetchTasks', que a su vez depende de 'username' y 'currentMonth'.
     }, [fetchTasks]);
 
-    // Define la función 'changeMonth' para actualizar el estado 'currentMonth'.
+    // Efecto para resetear el índice de la semana cuando cambia el mes o el modo de vista
+    useEffect(() => {
+        setCurrentWeekIndex(0);
+    }, [currentMonth, viewMode]);
+
+    // Cambia el mes visualizado (anterior/siguiente)
     const changeMonth = (direction) => {
-        // Actualiza 'currentMonth' usando una función para asegurar el acceso al valor previo.
         setCurrentMonth(prevMonth => {
-            // Crea un nuevo objeto Date basado en el mes anterior.
             const newDate = new Date(prevMonth);
-            // Modifica el mes del nuevo objeto Date sumando la dirección (-1 o 1).
             newDate.setMonth(prevMonth.getMonth() + direction);
-            // Comentario de código original: // if (newDate > new Date() && direction > 0) return prevMonth;
-            // Devuelve la nueva fecha calculada para actualizar el estado.
             return newDate;
+        });
+        // setCurrentWeekIndex(0); // El useEffect [currentMonth, viewMode] ya lo maneja
+    };
+
+    // Cambia la semana visualizada (anterior/siguiente) en la vista semanal
+    const changeWeek = (direction) => {
+        const weeks = getWeeksInCurrentMonth(); // Necesitamos el total de semanas para los límites
+        setCurrentWeekIndex(prevIndex => {
+            const newIndex = prevIndex + direction;
+            if (newIndex >= 0 && newIndex < weeks.length) {
+                return newIndex;
+            }
+            return prevIndex; // Mantenerse dentro de los límites
         });
     };
 
-    // Define la función 'generateMonthDays' para crear un array con los números de los días del mes actual.
+
+    // Genera un array con los números de los días del mes actual
     const generateMonthDays = () => {
-        // Calcula el número de días en el mes actual. Se usa mes+1 y día 0 para obtener el último día del mes actual.
         const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
-        // Crea y devuelve un array con números desde 1 hasta el número de días en el mes.
         return Array.from({ length: daysInMonth }, (_, index) => index + 1);
     };
 
-    // Define la función 'getTasksForDay' para filtrar las tareas del estado 'tasks' que corresponden a un día específico.
-    const getTasksForDay = (day) => {
-        // Filtra el array 'tasks'.
+    // Obtiene las tareas para un día específico del mes actual
+    const getTasksForDay = (dayNumber, month, year) => {
+        const targetMonth = month === undefined ? currentMonth.getMonth() : month;
+        const targetYear = year === undefined ? currentMonth.getFullYear() : year;
+
         return tasks.filter((task) => {
-            // Inicia un bloque try-catch para manejar posibles errores con las fechas de las tareas.
             try {
-                // Verifica si la propiedad 'fecha' existe en la tarea.
-                if (!task.fecha) return false; // Si no hay fecha, no se incluye la tarea.
-                // Crea un objeto Date a partir de la propiedad 'fecha' de la tarea.
-                const taskDate = new Date(task.fecha);
-                // Verifica si el objeto Date creado es válido.
-                if (isNaN(taskDate.getTime())) {
-                    // Advierte en consola si el formato de fecha no es válido.
-                    console.warn("Formato de fecha inválido detectado:", task.fecha, "para tarea:", task.id);
-                    // Si la fecha no es válida, no se incluye la tarea.
-                    return false;
-                }
-                // Compara el día, mes y año de la tarea con el día proporcionado y el mes/año del estado 'currentMonth'.
-                return taskDate.getDate() === day &&
-                       taskDate.getMonth() === currentMonth.getMonth() &&
-                       taskDate.getFullYear() === currentMonth.getFullYear();
-            // Captura cualquier error durante el procesamiento de la fecha.
+                if (!task.fecha) return false; 
+                const taskDate = new Date(task.fecha); 
+                return taskDate.getDate() === dayNumber &&
+                       taskDate.getMonth() === targetMonth &&
+                       taskDate.getFullYear() === targetYear;
             } catch (e) {
-                // Imprime el error en consola.
-                console.error("Error procesando fecha de tarea:", task.fecha, e);
-                // Si hay un error, no se incluye la tarea.
-                return false;
+                console.error("Principal: Error procesando fecha de tarea:", task.fecha, e);
+                return false; 
             }
         });
     };
+    
+    // Función auxiliar para obtener todas las semanas en el mes actual
+    const getWeeksInCurrentMonth = useCallback(() => {
+        const weeks = [];
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth();
+        const firstDateOfMonth = new Date(year, month, 1);
+        const lastDateOfMonth = new Date(year, month + 1, 0);
+        
+        let currentIterationDate = new Date(firstDateOfMonth);
+        let dayOfWeek = currentIterationDate.getDay(); 
+        let diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; 
+        currentIterationDate.setDate(currentIterationDate.getDate() + diffToMonday);
 
-    // Crea un formateador de fechas internacionalizado para mostrar el mes y año en español.
+        let weekNumber = 1;
+        while(currentIterationDate <= lastDateOfMonth) {
+            const weekStartDate = new Date(currentIterationDate); 
+            const weekEndDate = new Date(currentIterationDate);
+            weekEndDate.setDate(currentIterationDate.getDate() + 6); 
+
+            const displayLabelStartDate = new Date(Math.max(weekStartDate, firstDateOfMonth));
+            const displayLabelEndDate = new Date(Math.min(weekEndDate, lastDateOfMonth));
+            
+            if (weekStartDate.getMonth() === month || weekEndDate.getMonth() === month || (weekStartDate < firstDateOfMonth && weekEndDate > lastDateOfMonth) ) {
+                 weeks.push({
+                    weekNumber,
+                    startDate: weekStartDate, 
+                    endDate: weekEndDate,    
+                    displayLabel: `Semana ${weekNumber}: ${displayLabelStartDate.toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})} - ${displayLabelEndDate.toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})}`
+                });
+            }
+            
+            currentIterationDate.setDate(currentIterationDate.getDate() + 7); 
+            weekNumber++;
+            if (weekNumber > 7) break; 
+        }
+        return weeks;
+    }, [currentMonth]); // Dependencia de currentMonth
+
+    // Formateador de fecha para mostrar "Mes Año"
     const monthYearFormatter = new Intl.DateTimeFormat('es-ES', {
-        month: 'long', // Formato de mes: nombre completo (e.g., "Abril").
-        year: 'numeric' // Formato de año: número (e.g., "2025").
+        month: 'long',
+        year: 'numeric'
     });
 
-    // Inicio de la estructura JSX que renderiza el componente.
+    // Determina el mensaje de bienvenida
+    const getWelcomeMessage = () => {
+        const effectiveUser = getEffectiveUsername();
+        if (userRole === 'admin' && viewingAsUsername && viewingAsUsername !== username) {
+            return `Viendo novedades de: ${viewingAsUsername}`;
+        }
+        return effectiveUser ? `Bienvenido ${effectiveUser}, consulta tus novedades` : 'Bienvenido, consulta tus novedades';
+    };
+
+    // Genera los días para una semana específica que caen dentro del mes actual
+    const getDaysForWeekInMonth = (weekStartDate, weekEndDate) => {
+        const days = [];
+        let currentDate = new Date(weekStartDate);
+        while (currentDate <= weekEndDate) {
+            if (currentDate.getMonth() === currentMonth.getMonth() && currentDate.getFullYear() === currentMonth.getFullYear()) {
+                days.push(new Date(currentDate));
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        return days;
+    };
+
+    const weeksToDisplay = getWeeksInCurrentMonth(); // Calcular semanas una vez por render
+
     return (
-        // Contenedor principal del componente
         <div
             className="flex flex-col items-center relative min-h-screen w-full p-5 pb-[70px] box-border"
             style={{
-                // Establece la imagen de fondo usando una variable de entorno para la ruta.
                 backgroundImage: `url(${process.env.PUBLIC_URL}/icons/fondovertical.png)`,
-                // Ajusta el tamaño del fondo al 100% del ancho y altura automática para mantener la proporción.
                 backgroundSize: '100% auto',
-                // Posiciona la imagen de fondo arriba y centrada.
                 backgroundPosition: 'top center',
-                // Hace que la imagen de fondo se repita solo verticalmente.
                 backgroundRepeat: 'repeat-y',
             }}
         >
-            {/* Contenedor que envuelve el contenido principal para aplicar estilos o centrado. */}
             <div className="w-full max-w-[1200px] mb-[50px] z-10 flex flex-col items-center">
-                {/* Sección para mostrar el mensaje de bienvenida. */}
+                {/* Sección de bienvenida */}
                 <div className="w-full text-center mb-[30px]">
-                    {/* Muestra un mensaje de bienvenida personalizado si 'username' existe, o uno genérico si no. */}
                     <h2 className="text-[clamp(1.5rem,4vw,2rem)] text-center text-gray-800 mt-[30px] mb-[10px] [text-shadow:1px_1px_2px_rgba(255,255,255,0.7)]">
-                        {username ? `Bienvenido ${username}, consulta tus novedades` : 'Bienvenido, consulta tus novedades'}
+                        {getWelcomeMessage()}
                     </h2>
                 </div>
 
-                {/* Sección para la navegación entre meses. */}
-                <div className="mb-[30px] bg-white/85 p-[15px] rounded-lg flex justify-center items-center gap-[15px] [box-shadow:0_2px_5px_rgba(0,0,0,0.1)]">
-                    {/* Botón para ir al mes anterior. Llama a changeMonth con -1. Deshabilitado si isLoading es true. */}
-                    <button
-                        onClick={() => changeMonth(-1)}
-                        disabled={isLoading}
-                        className="py-[10px] px-[20px] text-base bg-blue-600 text-white border-none rounded-[5px] cursor-pointer transition-colors duration-300 ease-in-out transform active:scale-[0.98] hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
-                        &lt; Anterior
-                    </button>
-                    {/* Muestra el mes y año actual formateado. */}
-                    <span className="text-[1.3rem] font-bold text-gray-800 min-w-[180px] text-center">
-                        {monthYearFormatter.format(currentMonth)}
-                    </span>
-                    {/* Botón para ir al mes siguiente. Llama a changeMonth con 1. Deshabilitado si isLoading es true. */}
-                    <button
-                        onClick={() => changeMonth(1)}
-                        disabled={isLoading}
-                        className="py-[10px] px-[20px] text-base bg-blue-600 text-white border-none rounded-[5px] cursor-pointer transition-colors duration-300 ease-in-out transform active:scale-[0.98] hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
-                        Siguiente &gt;
-                    </button>
+                {/* Controles de navegación de mes y selector de vista */}
+                <div className="mb-5 bg-white/85 p-[15px] rounded-lg flex flex-col sm:flex-row justify-center items-center gap-[15px] [box-shadow:0_2px_5px_rgba(0,0,0,0.1)]">
+                    {/* Navegación de Mes */}
+                    <div className="flex justify-center items-center gap-[15px]">
+                        <button
+                            onClick={() => changeMonth(-1)}
+                            disabled={isLoading}
+                            className="py-[10px] px-[20px] text-base bg-blue-600 text-white border-none rounded-[5px] cursor-pointer transition-colors duration-300 ease-in-out transform active:scale-[0.98] hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        >
+                            &lt; Anterior
+                        </button>
+                        <span className="text-[1.3rem] font-bold text-gray-800 min-w-[180px] text-center">
+                            {monthYearFormatter.format(currentMonth)}
+                        </span>
+                        <button
+                            onClick={() => changeMonth(1)}
+                            disabled={isLoading}
+                            className="py-[10px] px-[20px] text-base bg-blue-600 text-white border-none rounded-[5px] cursor-pointer transition-colors duration-300 ease-in-out transform active:scale-[0.98] hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        >
+                            Siguiente &gt;
+                        </button>
+                    </div>
+                    {/* Selector de Vista (Mes/Semana) */}
+                    <div className="mt-3 sm:mt-0">
+                        <select 
+                            value={viewMode} 
+                            onChange={(e) => setViewMode(e.target.value)}
+                            className="py-[10px] px-[15px] text-base border border-gray-300 rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            disabled={isLoading}
+                        >
+                            <option value="month">Ver por Mes</option>
+                            <option value="week">Ver por Semana</option>
+                        </select>
+                    </div>
                 </div>
 
-                {/* Muestra un mensaje de carga si isLoading es true. */}
+                {/* Indicador de carga */}
                 {isLoading && (
                     <div className="w-full max-w-[600px] my-5 mx-auto p-[15px] rounded-lg text-center text-[1.1rem] font-bold bg-yellow-100/90 text-yellow-800">
                         Cargando tareas...
                     </div>
                 )}
-                {/* Muestra un mensaje de error si error tiene un valor. */}
+                {/* Mensaje de error */}
                 {error && (
                     <div className="w-full max-w-[600px] my-5 mx-auto p-[15px] rounded-lg text-center text-[1.1rem] font-bold bg-red-100/90 text-red-800">
                         {error}
                     </div>
                 )}
 
-                {/* Renderiza la lista de tareas solo si no está cargando y no hay errores. */}
-                {!isLoading && !error && (
-                    // Contenedor para la lista de días y sus tareas.
+                {/* Vista por Mes */}
+                {!isLoading && !error && viewMode === 'month' && (
                     <div className="flex flex-col gap-[25px] p-[25px] rounded-[10px] w-full bg-white/90 [box-shadow:0_6px_12px_rgba(0,0,0,0.15)]">
-                        {/* Itera sobre el array de días generado por generateMonthDays. */}
-                        {generateMonthDays().map((day) => {
-                            // Obtiene las tareas filtradas para el día actual de la iteración.
-                            const dailyTasks = getTasksForDay(day);
-                            // Renderiza un contenedor para cada día. 'key' es necesaria para listas en React.
+                        {generateMonthDays().map((dayNumber) => {
+                            const dailyTasks = getTasksForDay(dayNumber); 
                             return (
-                                <div key={day} className="bg-white p-5 rounded-lg border border-gray-200">
-                                    {/* Muestra el número del día y el nombre del mes. */}
+                                <div key={`month-day-${dayNumber}`} className="bg-white p-5 rounded-lg border border-gray-200">
                                     <h3 className="text-[1.6rem] mt-0 mb-[15px] text-blue-700 border-b-2 border-gray-100 pb-[10px]">
-                                        {day} de {currentMonth.toLocaleString('es-ES', { month: 'long' })}
+                                        {dayNumber} de {currentMonth.toLocaleString('es-ES', { month: 'long' })}
                                     </h3>
-
-                                    {/* Contenedor para las tareas de este día específico. */}
                                     <div className="flex flex-col gap-[15px]">
-                                        {/* Comprueba si no hay tareas para este día. */}
                                         {dailyTasks.length === 0 ? (
-                                            // Muestra un mensaje si no hay tareas.
                                             <p className="text-gray-500 italic py-[10px]">No hay tareas para este día.</p>
                                         ) : (
-                                            // Si hay tareas, itera sobre ellas.
                                             dailyTasks.map((task) => (
-                                                // Renderiza un contenedor para cada tarea. Usa task.id o task._id como key.
                                                 <div
-                                                    key={task.id || task._id}
+                                                    key={task.id || task._id} 
                                                     className="p-[15px] border border-gray-300 border-l-[5px] border-l-blue-600 rounded-md bg-gray-50 transition-shadow duration-300 ease-in-out [box-shadow:0_1px_3px_rgba(0,0,0,0.08)] hover:[box-shadow:0_3px_6px_rgba(0,0,0,0.12)]"
                                                 >
-                                                    {/* Muestra el título de la tarea en negrita. */}
                                                     <p className="my-[5px] leading-normal"><strong className="text-gray-800">{task.titulo}</strong></p>
-                                                    {/* Muestra la descripción de la tarea. */}
                                                     <p className="my-[5px] leading-normal">{task.descripcion}</p>
-                                                    {/* Muestra la hora de la tarea si existe. */}
                                                     {task.hora && <p className="my-[5px] leading-normal"><small className="text-gray-600 text-[0.9em]">Hora: {task.hora}</small></p>}
-                                                    {/* Muestra la plataforma de la tarea si existe. */}
                                                     {task.plataforma && <p className="my-[5px] leading-normal"><small className="text-gray-600 text-[0.9em]">Plataforma: {task.plataforma}</small></p>}
                                                 </div>
                                             ))
@@ -249,19 +272,101 @@ const Principal = () => {
                                 </div>
                             );
                         })}
-                        {/* Muestra un mensaje general si no hay ninguna tarea en todo el mes y hay días en el mes. */}
                         {tasks.length === 0 && generateMonthDays().length > 0 && (
-                            <div className="bg-white p-5 rounded-lg border border-gray-200">
+                            <div className="bg-white p-5 rounded-lg border border-gray-200 mt-5">
                                 <p className="text-gray-500 italic py-[10px]">No hay tareas programadas para este mes.</p>
                             </div>
                         )}
                     </div>
                 )}
-            {/* Cierre del div 'content-wrapper'. */}
+
+                {/* Vista por Semana (una semana a la vez) */}
+                {!isLoading && !error && viewMode === 'week' && (() => {
+                    // const weeksToDisplay = getWeeksInCurrentMonth(); // Ya se calcula fuera del return
+                    if (!weeksToDisplay || weeksToDisplay.length === 0) {
+                        return (
+                            <div className="bg-white p-5 rounded-lg border border-gray-200 mt-5">
+                                <p className="text-gray-500 italic py-[10px]">No hay semanas para mostrar en este mes.</p>
+                            </div>
+                        );
+                    }
+                    const currentDisplayWeek = weeksToDisplay[currentWeekIndex];
+                     if (!currentDisplayWeek) { // Seguridad adicional
+                        return (
+                            <div className="bg-white p-5 rounded-lg border border-gray-200 mt-5">
+                                <p className="text-gray-500 italic py-[10px]">No se pudo cargar la información de la semana.</p>
+                            </div>
+                        );
+                    }
+
+
+                    return (
+                        <div className="flex flex-col gap-[25px] p-[25px] rounded-[10px] w-full bg-white/90 [box-shadow:0_6px_12px_rgba(0,0,0,0.15)]">
+                            {/* Controles de Navegación Semanal */}
+                            <div className="flex justify-between items-center mb-4 bg-gray-50 p-3 rounded-md">
+                                <button 
+                                    onClick={() => changeWeek(-1)} 
+                                    disabled={currentWeekIndex === 0 || isLoading}
+                                    className="py-2 px-4 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-300"
+                                >
+                                    &lt; Semana Anterior
+                                </button>
+                                <h3 className="text-lg sm:text-xl font-semibold text-center text-green-700 mx-2">
+                                    {currentDisplayWeek.displayLabel}
+                                </h3>
+                                <button 
+                                    onClick={() => changeWeek(1)} 
+                                    disabled={currentWeekIndex >= weeksToDisplay.length - 1 || isLoading}
+                                    className="py-2 px-4 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-300"
+                                >
+                                    Semana Siguiente &gt;
+                                </button>
+                            </div>
+
+                            {/* Contenido de la semana actual (días y tareas) */}
+                            <div className="bg-white p-5 rounded-lg border border-gray-200">
+                                {getDaysForWeekInMonth(currentDisplayWeek.startDate, currentDisplayWeek.endDate).map(dayDate => {
+                                    const dailyTasks = getTasksForDay(dayDate.getDate(), dayDate.getMonth(), dayDate.getFullYear());
+                                    return (
+                                        <div key={`week-${currentDisplayWeek.weekNumber}-day-${dayDate.getDate()}`} className="mb-5 pl-4 border-l-4 border-green-200 py-2">
+                                            <h4 className="text-[1.4rem] mt-0 mb-[10px] text-green-600">
+                                                {dayDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                            </h4>
+                                            <div className="flex flex-col gap-[10px]">
+                                                {dailyTasks.length === 0 ? (
+                                                    <p className="text-gray-500 italic py-[5px] text-sm">No hay tareas para este día.</p>
+                                                ) : (
+                                                    dailyTasks.map((task) => (
+                                                        <div
+                                                            key={task.id || task._id}
+                                                            className="p-[10px] border border-gray-300 border-l-[5px] border-l-green-500 rounded-md bg-gray-50 transition-shadow duration-300 ease-in-out [box-shadow:0_1px_2px_rgba(0,0,0,0.06)] hover:[box-shadow:0_2px_4px_rgba(0,0,0,0.1)]"
+                                                        >
+                                                            <p className="my-[5px] leading-normal"><strong className="text-gray-800">{task.titulo}</strong></p>
+                                                            <p className="my-[5px] leading-normal text-sm">{task.descripcion}</p>
+                                                            {task.hora && <p className="my-[5px] leading-normal"><small className="text-gray-600 text-[0.85em]">Hora: {task.hora}</small></p>}
+                                                            {task.plataforma && <p className="my-[5px] leading-normal"><small className="text-gray-600 text-[0.85em]">Plataforma: {task.plataforma}</small></p>}
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {getDaysForWeekInMonth(currentDisplayWeek.startDate, currentDisplayWeek.endDate).length === 0 && (
+                                     <p className="text-gray-500 italic py-[10px]">Esta semana no tiene días en el mes actual.</p>
+                                )}
+                            </div>
+                             {tasks.length === 0 && weeksToDisplay.length > 0 && ( // Si no hay tareas en todo el mes
+                                <div className="bg-white p-5 rounded-lg border border-gray-200 mt-5">
+                                    <p className="text-gray-500 italic py-[10px]">No hay tareas programadas para este mes.</p>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
             </div>
-        {/* Cierre del div 'principal-container'. */}
         </div>
     );
 };
-// Exporta el componente Principal para que pueda ser usado en otras partes de la aplicación.
+
 export default Principal;
