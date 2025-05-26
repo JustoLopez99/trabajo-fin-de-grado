@@ -4,7 +4,6 @@ import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 
 const Calendario = () => {
-  // Obtiene 'username' (del usuario logueado), 'userRole', y 'viewingAsUsername' (del desplegable del admin)
   const { username, userRole, viewingAsUsername } = useOutletContext();
 
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -20,19 +19,15 @@ const Calendario = () => {
   const [formError, setFormError] = useState('');
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
 
-  // Determina el username efectivo que se usará para cargar y crear tareas.
-  // Si es admin y está viendo como otro usuario, usa viewingAsUsername.
-  // Si no, usa el username del usuario logueado (sea admin o cliente).
   const getEffectiveUsername = useCallback(() => {
     if (userRole === 'admin' && viewingAsUsername) {
       return viewingAsUsername;
     }
-    return username; // Para cliente, o admin sin "ver como" otro, o admin viendo su propio perfil
+    return username;
   }, [userRole, username, viewingAsUsername]);
 
-
   const fetchTasks = useCallback(async () => {
-    const usernameToFetch = getEffectiveUsername(); // Usa el username efectivo
+    const usernameToFetch = getEffectiveUsername();
 
     if (!usernameToFetch) {
       setTasks([]);
@@ -49,7 +44,7 @@ const Calendario = () => {
 
     try {
       const response = await axios.get(`http://localhost:3000/api/tasks`, {
-        params: { username: usernameToFetch, year, month }, // Envía el username efectivo
+        params: { username: usernameToFetch, year, month },
         timeout: 10000,
       });
       console.log("Calendario: Tareas recibidas:", response.data);
@@ -61,7 +56,7 @@ const Calendario = () => {
     } finally {
       setIsLoadingTasks(false);
     }
-  }, [currentMonth, getEffectiveUsername]); // Dependencia de getEffectiveUsername (que a su vez depende de userRole, username, viewingAsUsername)
+  }, [currentMonth, getEffectiveUsername]);
 
   useEffect(() => {
     fetchTasks();
@@ -114,7 +109,7 @@ const Calendario = () => {
     setFormMessage('');
     setFormError('');
 
-    const usernameForNewTask = getEffectiveUsername(); // Usa el username efectivo
+    const usernameForNewTask = getEffectiveUsername();
 
     if (!usernameForNewTask) {
         setFormError("No se pudo determinar el usuario para asignar la tarea.");
@@ -122,7 +117,7 @@ const Calendario = () => {
     }
 
     try {
-      const newTask = { ...formData, username: usernameForNewTask }; // Asigna la tarea al username efectivo
+      const newTask = { ...formData, username: usernameForNewTask };
       await axios.post('http://localhost:3000/api/tasks', newTask);
       setFormMessage(`Tarea añadida correctamente para ${usernameForNewTask}`);
       setFormData({ fecha: '', hora: '', plataforma: '', titulo: '', descripcion: '' });
@@ -155,31 +150,24 @@ const Calendario = () => {
     year: 'numeric'
   });
 
-  // Texto para el encabezado del formulario, indicando para quién se añade la tarea si es admin
   const formHeaderTitle = () => {
     if (userRole === 'admin') {
       const effectiveUser = getEffectiveUsername();
-      if (effectiveUser && effectiveUser !== username) { // Si es admin y está viendo como OTRO usuario
+      if (effectiveUser && effectiveUser !== username) {
         return `Añadir Nueva Tarea para: ${effectiveUser}`;
       }
-      return `Añadir Nueva Tarea para: ${username} (Admin)`; // Si es admin y viendo su propio calendario o no hay selección
+      return `Añadir Nueva Tarea para: ${username} (Admin)`;
     }
-    return 'Añadir Nueva Tarea'; // Para el rol 'client' (aunque el formulario no se muestra)
+    return 'Añadir Nueva Tarea';
   };
-
 
   return (
     <div
-      className="flex flex-col lg:flex-row w-full h-full items-start"
-      style={{
-        backgroundImage: `url(${process.env.PUBLIC_URL}/icons/fondo.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
+      className="flex flex-col lg:flex-row w-full h-full items-start bg-white" 
     >
-      <div className="w-full lg:w-3/4 p-4 sm:p-6 md:p-8 flex flex-col gap-10 overflow-y-auto h-full">
-        <div className="bg-white/90 p-5 rounded-lg shadow-xl">
+      <div className="w-full lg:w-3/4 p-4 sm:p-6 md:p-8 flex flex-col gap-10 overflow-y-auto h-full lg:mr-4">
+        {/* Contenedor del calendario con nuevo estilo tipo "Principal.js" */}
+        <div className="bg-white/90 p-5 rounded-lg [box-shadow:0_6px_12px_rgba(0,0,0,0.15)]"> 
           <div className="flex justify-between items-center text-xl sm:text-2xl font-semibold mb-5">
             <button onClick={() => changeMonth(-1)} className="p-2 rounded-md hover:bg-gray-200" disabled={isLoadingTasks}>&lt;</button>
             <span>{monthYearFormatter.format(currentMonth)}</span>
@@ -192,13 +180,13 @@ const Calendario = () => {
           </div>
           
           {isLoadingTasks && <div className="text-center p-4">Cargando tareas...</div>}
-          {!isLoadingTasks && formError && tasks.length === 0 && <p className="p-3 text-sm text-red-700 bg-red-100 rounded-md text-center my-2">{formError}</p>}
+          {!isLoadingTasks && formError && tasks.length === 0 && <p className="p-3 text-sm text-red-700 bg-red-100/80 rounded-md text-center my-2">{formError}</p>}
 
           <div className="grid grid-cols-1 gap-px bg-gray-200 border border-gray-200 mt-1">
             {weeks.map((week, weekIndex) => (
               <div key={weekIndex} className="grid grid-cols-7 gap-px">
                 {week.map((day, dayIndex) => (
-                  <div key={dayIndex} className={`min-h-[80px] sm:min-h-[100px] p-1.5 text-left ${day ? 'bg-gray-50 hover:bg-gray-200' : 'bg-gray-100/50'}`}>
+                  <div key={dayIndex} className={`min-h-[80px] sm:min-h-[100px] p-1.5 text-left ${day ? 'bg-white hover:bg-gray-50' : 'bg-gray-100/50'}`}> {/* Celdas de día en blanco sobre el fondo bg-white/90 del bloque */}
                     {day && (
                       <div className="text-xs sm:text-sm font-bold mb-1 flex flex-col items-start h-full">
                         {day}
@@ -242,27 +230,26 @@ const Calendario = () => {
           </div>
         </div>
 
-        {/* El formulario de añadir tarea solo se muestra si el rol es admin */}
+        {/* Contenedor del formulario con nuevo estilo tipo "Principal.js" */}
         {userRole === 'admin' && (
-          <div className="bg-white p-5 rounded-lg shadow-xl">
-            {/* Título dinámico para el formulario */}
+          <div className="bg-white/90 p-5 rounded-lg [box-shadow:0_6px_12px_rgba(0,0,0,0.15)]">
             <h2 className="text-center text-xl font-semibold mb-5 text-gray-700">{formHeaderTitle()}</h2>
             
-            {formMessage && <p className="mb-3 p-3 text-sm text-green-700 bg-green-100 rounded-md">{formMessage}</p>}
-            {formError && !isLoadingTasks && <p className="mb-3 p-3 text-sm text-red-700 bg-red-100 rounded-md">{formError}</p>}
+            {formMessage && <p className="mb-3 p-3 text-sm text-green-700 bg-green-100/80 rounded-md">{formMessage}</p>}
+            {formError && !isLoadingTasks && <p className="mb-3 p-3 text-sm text-red-700 bg-red-100/80 rounded-md">{formError}</p>}
             
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
                 <label htmlFor="fecha" className="block text-sm font-medium text-gray-600 mb-1">Fecha:</label>
-                <input type="date" id="fecha" value={formData.fecha} onChange={handleChange} required className="w-full p-2.5 border rounded-md"/>
+                <input type="date" id="fecha" value={formData.fecha} onChange={handleChange} required className="w-full p-2.5 border rounded-md bg-white"/>
               </div>
               <div>
                 <label htmlFor="hora" className="block text-sm font-medium text-gray-600 mb-1">Hora:</label>
-                <input type="time" id="hora" value={formData.hora} onChange={handleChange} required className="w-full p-2.5 border rounded-md"/>
+                <input type="time" id="hora" value={formData.hora} onChange={handleChange} required className="w-full p-2.5 border rounded-md bg-white"/>
               </div>
               <div>
                 <label htmlFor="plataforma" className="block text-sm font-medium text-gray-600 mb-1">Plataforma:</label>
-                <select id="plataforma" value={formData.plataforma} onChange={handleChange} required className="w-full p-2.5 border rounded-md">
+                <select id="plataforma" value={formData.plataforma} onChange={handleChange} required className="w-full p-2.5 border rounded-md bg-white">
                   <option value="">Selecciona una plataforma</option>
                   <option value="Instagram">Instagram</option>
                   <option value="Tiktok">Tiktok</option>
@@ -273,13 +260,16 @@ const Calendario = () => {
               </div>
               <div>
                 <label htmlFor="titulo" className="block text-sm font-medium text-gray-600 mb-1">Título:</label>
-                <input type="text" id="titulo" value={formData.titulo} onChange={handleChange} required className="w-full p-2.5 border rounded-md"/>
+                <input type="text" id="titulo" value={formData.titulo} onChange={handleChange} required className="w-full p-2.5 border rounded-md bg-white"/>
               </div>
               <div>
                 <label htmlFor="descripcion" className="block text-sm font-medium text-gray-600 mb-1">Descripción:</label>
-                <textarea id="descripcion" rows="3" value={formData.descripcion} onChange={handleChange} className="w-full p-2.5 border rounded-md"/>
+                <textarea id="descripcion" rows="3" value={formData.descripcion} onChange={handleChange} className="w-full p-2.5 border rounded-md bg-white"/>
               </div>
-              <button type="submit" className="mt-2 py-2.5 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700">
+              <button 
+                type="submit" 
+                className="mt-2 py-2.5 px-4 bg-slate-800 text-white font-semibold rounded-md hover:bg-slate-700 transition-colors duration-150"
+              >
                 Añadir Tarea
               </button>
             </form>
@@ -288,9 +278,10 @@ const Calendario = () => {
 
       </div>
 
+      {/* Leyenda (mantiene su estilo bg-gray-100/75) */}
       <aside className="w-full lg:w-1/4 p-4 sm:p-6 md:p-8 lg:sticky lg:top-[calc(7vh+2rem)] lg:h-[calc(93vh-4rem)]">
-        <div className="bg-purple-100/70 rounded-lg p-4 shadow-lg h-full lg:overflow-y-auto">
-          <h3 className="text-lg font-semibold text-purple-800 mb-3">Leyenda</h3>
+        <div className="bg-gray-100/75 rounded-lg p-4 shadow-md h-fit w-fit">
+          <h3 className="text-lg font-semibold text-slate-800 mb-3">Leyenda</h3>
           <div className="space-y-2">
             {Object.entries(platformDotColors).map(([platform, colorClass]) => (
               <div key={platform} className="flex items-center text-sm text-gray-700">

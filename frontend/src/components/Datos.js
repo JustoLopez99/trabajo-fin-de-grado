@@ -4,8 +4,7 @@ import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 
 const Datos = () => {
-  // Obtener username del usuario logueado, su rol, y el username que el admin podría estar viendo
-  const { username, userRole, viewingAsUsername } = useOutletContext() || {}; // Proporcionar un objeto vacío por defecto
+  const { username, userRole, viewingAsUsername } = useOutletContext() || {};
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -35,16 +34,15 @@ const Datos = () => {
   const [formMessage, setFormMessage] = useState('');
   const [formError, setFormError] = useState('');
 
-  // Determina el username efectivo para la carga y creación de datos
   const getEffectiveUsername = useCallback(() => {
     if (userRole === 'admin' && viewingAsUsername) {
       return viewingAsUsername;
     }
-    return username; // Username del usuario logueado (cliente o admin viendo su propio perfil)
+    return username;
   }, [userRole, username, viewingAsUsername]);
 
   const fetchPublicaciones = useCallback(async () => {
-    const usernameToFetch = getEffectiveUsername(); // Usar el username efectivo
+    const usernameToFetch = getEffectiveUsername();
 
     if (!usernameToFetch) {
       setIsLoading(false);
@@ -70,7 +68,7 @@ const Datos = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, itemsPerPage, getEffectiveUsername]); // Dependencia de getEffectiveUsername
+  }, [currentPage, itemsPerPage, getEffectiveUsername]);
 
   useEffect(() => {
     fetchPublicaciones();
@@ -104,7 +102,7 @@ const Datos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const usernameForNewPost = getEffectiveUsername(); // Usar el username efectivo
+    const usernameForNewPost = getEffectiveUsername();
 
     if (!usernameForNewPost) {
       setFormError('Nombre de usuario efectivo no disponible. No se puede añadir la publicación.');
@@ -115,7 +113,7 @@ const Datos = () => {
     try {
       const publicacionAEnviar = {
         ...formData,
-        username: usernameForNewPost, // Asociar con el username efectivo
+        username: usernameForNewPost,
         impresiones: parseInt(formData.impresiones, 10) || 0,
         me_gusta: parseInt(formData.me_gusta, 10) || 0,
         comentarios: parseInt(formData.comentarios, 10) || 0,
@@ -128,9 +126,8 @@ const Datos = () => {
       await axios.post('http://localhost:3000/api/publicaciones', publicacionAEnviar);
       setFormMessage(`Publicación añadida correctamente para ${usernameForNewPost}.`);
       setFormData(initialFormData);
-      // Resetear a la primera página podría ser bueno si la nueva publicación afecta el orden o total de ítems
       if (currentPage !== 1) setCurrentPage(1);
-      else fetchPublicaciones(); // Si ya está en la página 1, solo recargar
+      else fetchPublicaciones();
     } catch (error) {
       console.error('Datos: Error al añadir la publicación', error.response ? error.response.data : error);
       setFormError(error.response?.data?.message || error.response?.data?.error || error.response?.data || 'Error al añadir publicación.');
@@ -148,7 +145,6 @@ const Datos = () => {
     { key: 'interacciones_total', label: 'Total Inter.' }, { key: 'engagement_rate', label: 'Engagement %' },
   ];
 
-  // Título para el formulario de añadir publicación
   const getFormTitle = () => {
     const effectiveUser = getEffectiveUsername();
     if (userRole === 'admin' && effectiveUser && effectiveUser !== username) {
@@ -157,7 +153,6 @@ const Datos = () => {
     return 'Añadir Nueva Publicación';
   };
   
-  // Título para la tabla de publicaciones
   const getTableTitle = () => {
     const effectiveUser = getEffectiveUsername();
      if (userRole === 'admin' && effectiveUser && effectiveUser !== username) {
@@ -167,25 +162,19 @@ const Datos = () => {
   }
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen overflow-y-auto pt-5 pb-12 box-border"
-         style={{
-           backgroundImage: `url(${process.env.PUBLIC_URL}/icons/fondo.png)`,
-           backgroundSize: 'cover',
-           backgroundPosition: 'center',
-           backgroundRepeat: 'no-repeat',
-           backgroundAttachment: 'fixed',
-         }}>
+    <div className="flex flex-col items-center w-full min-h-screen overflow-y-auto pt-5 pb-12 box-border bg-white">
       <div className="w-[95%] sm:w-[90%] max-w-screen-xl my-7 flex flex-col gap-8 sm:gap-10">
         
-        <div className="bg-white/95 p-4 sm:p-6 rounded-xl shadow-2xl">
+        {/* Bloque de la tabla de publicaciones con nuevo estilo */}
+        <div className="bg-white/90 p-4 sm:p-6 rounded-lg [box-shadow:0_6px_12px_rgba(0,0,0,0.15)]">
           <h2 className="text-center text-xl sm:text-2xl font-semibold mb-5 sm:mb-6 text-gray-700">{getTableTitle()}</h2>
           {isLoading && <p className="text-center text-gray-500 py-4">Cargando publicaciones...</p>}
-          {tableError && !isLoading && <p className="mb-4 p-3 text-sm text-center text-red-700 bg-red-100 rounded-md shadow">{tableError}</p>}
+          {tableError && !isLoading && <p className="mb-4 p-3 text-sm text-center text-red-700 bg-red-100/80 rounded-md shadow">{tableError}</p>}
           {!isLoading && !tableError && publicaciones.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse min-w-[1200px]">
                 <thead>
-                  <tr className="bg-gray-100">
+                  <tr className="bg-gray-100"> {/* El fondo del encabezado de la tabla puede permanecer así o ajustarse */}
                     {tableHeaders.map(header => (
                       <th key={header.key} className="border border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm font-bold text-gray-600 whitespace-nowrap">
                         {header.label}
@@ -195,7 +184,7 @@ const Datos = () => {
                 </thead>
                 <tbody>
                   {publicaciones.map((pub) => (
-                    <tr key={pub.id} className="hover:bg-gray-50 even:bg-gray-50/50">
+                    <tr key={pub.id} className="hover:bg-gray-50/50 even:bg-transparent"> {/* Ajuste de even:bg para el nuevo fondo del bloque */}
                       {tableHeaders.map(header => (
                         <td key={`${pub.id}-${header.key}`} className="border border-gray-300 p-2 sm:p-3 text-xs sm:text-sm text-gray-700 align-middle">
                           {header.key === 'fecha_publicacion' ? new Date(pub[header.key]).toLocaleDateString() :
@@ -216,23 +205,24 @@ const Datos = () => {
           {totalPages > 0 && !isLoading && !tableError && (
             <div className="flex justify-center items-center mt-5 sm:mt-6 gap-3 sm:gap-4">
               <button onClick={() => changePage(-1)} disabled={currentPage === 1}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded-md text-xs sm:text-sm transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
+                      className="bg-slate-800 hover:bg-slate-700 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded-md text-xs sm:text-sm transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
                 &lt; Anterior
               </button>
               <span className="text-xs sm:text-sm text-gray-700">Página {currentPage} de {totalPages}</span>
               <button onClick={() => changePage(1)} disabled={currentPage === totalPages}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded-md text-xs sm:text-sm transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
+                      className="bg-slate-800 hover:bg-slate-700 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded-md text-xs sm:text-sm transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
                 Siguiente &gt;
               </button>
             </div>
           )}
         </div>
 
+        {/* Bloque del formulario para añadir publicación con nuevo estilo */}
         {userRole === 'admin' && (
-          <div className="bg-white/95 p-4 sm:p-6 rounded-xl shadow-2xl">
+          <div className="bg-white/90 p-4 sm:p-6 rounded-lg [box-shadow:0_6px_12px_rgba(0,0,0,0.15)]">
             <h2 className="text-center text-xl sm:text-2xl font-semibold mb-5 sm:mb-6 text-gray-700">{getFormTitle()}</h2>
-            {formMessage && <p className="mb-4 p-3 text-sm text-green-700 bg-green-100 rounded-md shadow">{formMessage}</p>}
-            {formError && <p className="mb-4 p-3 text-sm text-red-700 bg-red-100 rounded-md shadow">{formError}</p>}
+            {formMessage && <p className="mb-4 p-3 text-sm text-green-700 bg-green-100/80 rounded-md shadow">{formMessage}</p>}
+            {formError && <p className="mb-4 p-3 text-sm text-red-700 bg-red-100/80 rounded-md shadow">{formError}</p>}
             
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               <div className="md:col-span-1 flex flex-col gap-4 sm:gap-5">
@@ -243,7 +233,7 @@ const Datos = () => {
                     value={formData.tipo_post} 
                     onChange={handleChange} 
                     required
-                    className="w-full p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"
+                    className="w-full p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm bg-white" /* Añadido bg-white */
                   >
                     <option value="">Selecciona una opción</option>
                     <option value="Instagram">Instagram</option>
@@ -259,48 +249,48 @@ const Datos = () => {
                 <div>
                   <label htmlFor="titulo" className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Título:</label>
                   <input type="text" id="titulo" value={formData.titulo} onChange={handleChange}
-                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"/>
+                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm bg-white"/> {/* Añadido bg-white */}
                 </div>
                 <div>
                   <label htmlFor="fecha_publicacion" className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Fecha de Publicación:</label>
                   <input type="date" id="fecha_publicacion" value={formData.fecha_publicacion} onChange={handleChange} required
-                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"/>
+                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm bg-white"/> {/* Añadido bg-white */}
                 </div>
                 <div>
                   <label htmlFor="hora_publicacion" className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Hora de Publicación:</label>
                   <input type="time" id="hora_publicacion" value={formData.hora_publicacion} onChange={handleChange} required
-                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"/>
+                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm bg-white"/> {/* Añadido bg-white */}
                 </div>
                 <div>
                   <label htmlFor="impresiones" className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Impresiones:</label>
                   <input type="number" id="impresiones" value={formData.impresiones} onChange={handleChange} required min="0"
-                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"/>
+                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm bg-white"/> {/* Añadido bg-white */}
                 </div>
                 <div>
                   <label htmlFor="me_gusta" className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Me Gusta:</label>
                   <input type="number" id="me_gusta" value={formData.me_gusta} onChange={handleChange} min="0"
-                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"/>
+                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm bg-white"/> {/* Añadido bg-white */}
                 </div>
                 <div>
                   <label htmlFor="formato_contenido" className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Formato del Contenido:</label>
                   <input type="text" id="formato_contenido" value={formData.formato_contenido} onChange={handleChange}
-                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"/>
+                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm bg-white"/> {/* Añadido bg-white */}
                 </div>
               </div>
               <div className="md:col-span-1 flex flex-col gap-4 sm:gap-5">
                 <div>
                   <label htmlFor="comentarios" className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Comentarios:</label>
                   <input type="number" id="comentarios" value={formData.comentarios} onChange={handleChange} min="0"
-                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"/>
+                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm bg-white"/> {/* Añadido bg-white */}
                 </div>
                 <div>
                   <label htmlFor="compartidos" className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Compartidos:</label>
                   <input type="number" id="compartidos" value={formData.compartidos} onChange={handleChange} min="0"
-                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"/>
+                        className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm bg-white"/> {/* Añadido bg-white */}
                 </div>
                 <div className="flex items-center gap-2 pt-2 sm:pt-3">
                   <input type="checkbox" id="contiene_enlace" checked={formData.contiene_enlace} onChange={handleChange} 
-                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"/>
+                        className="h-4 w-4 text-slate-600 border-gray-300 rounded focus:ring-slate-500"/>
                   <label htmlFor="contiene_enlace" className="text-xs sm:text-sm font-medium text-gray-600">Contiene Enlace</label>
                 </div>
                 <div>
@@ -312,7 +302,7 @@ const Datos = () => {
                     onChange={handleChange} 
                     min="0"
                     disabled={!formData.contiene_enlace}
-                    className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm text-xs sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
+                    className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm text-xs sm:text-sm focus:ring-slate-500 focus:border-slate-500 disabled:bg-gray-100 disabled:text-gray-500 bg-white" /* Añadido bg-white, el disabled:bg-gray-100 lo sobreescribirá */
                   />
                 </div>
                 
@@ -322,7 +312,7 @@ const Datos = () => {
                       id="tiempo_retencion_na" 
                       checked={formData.tiempo_retencion_na} 
                       onChange={handleChange}
-                      className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      className="h-4 w-4 text-slate-600 border-gray-300 rounded focus:ring-slate-500"
                     />
                   <label htmlFor="tiempo_retencion_na" className="text-xs sm:text-sm font-medium text-gray-600">N/A para Tiempo Retención</label>
                 </div>
@@ -336,18 +326,18 @@ const Datos = () => {
                     onChange={handleChange} 
                     min="0"
                     disabled={formData.tiempo_retencion_na}
-                    className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm disabled:bg-gray-100 disabled:text-gray-500"
+                    className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm disabled:bg-gray-100 disabled:text-gray-500 bg-white" /* Añadido bg-white, el disabled:bg-gray-100 lo sobreescribirá */
                   />
                 </div>
                 <div>
                   <label htmlFor="notas" className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Notas:</label>
                   <textarea id="notas" rows="3" value={formData.notas} onChange={handleChange}
-                            className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm resize-vertical min-h-[60px] sm:min-h-[75px]"/>
+                            className="w-full p-2 sm:p-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 text-xs sm:text-sm resize-vertical min-h-[60px] sm:min-h-[75px] bg-white"/> {/* Añadido bg-white */}
                 </div>
               </div>
               <div className="md:col-span-2">
                 <button type="submit"
-                        className="mt-3 sm:mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors text-sm sm:text-base">
+                        className="mt-3 sm:mt-4 w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2.5 px-4 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 transition-colors text-sm sm:text-base">
                   Añadir Publicación
                 </button>
               </div>

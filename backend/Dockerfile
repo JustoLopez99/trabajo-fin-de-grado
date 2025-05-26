@@ -10,6 +10,9 @@ COPY package*.json ./
 # Instala las dependencias del proyecto
 RUN npm install
 
+# Instala nodemon globalmente
+RUN npm install -g nodemon
+
 # Instala netcat (nc) y PostgreSQL client (psql) para usar en el script wait-for-it.sh
 RUN apt-get update && apt-get install -y netcat postgresql-client
 
@@ -20,4 +23,4 @@ COPY . .
 EXPOSE 3000
 
 # El comando para iniciar la aplicación cuando el contenedor se ejecute
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:dev"]

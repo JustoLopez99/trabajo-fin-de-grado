@@ -1,0 +1,14 @@
+# frontend/Dockerfile.dev
+FROM node:16
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# Usualmente React usa el puerto 3000 (Vite podría usar el 5173)
+EXPOSE 3000
+
+CMD ["npm", "start"]

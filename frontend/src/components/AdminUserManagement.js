@@ -115,8 +115,7 @@ function AdminUserManagement() {
   const [editingUser, setEditingUser] = useState(null); // Almacena el usuario que se está editando.
 
   // URL base de la API para las operaciones de usuarios.
-  // Asegúrate de que esta URL sea correcta para tu backend.
-  const API_URL = '/api/users';
+  const API_URL = 'http://localhost:3000/api/users';
 
   // Función para obtener el token de autenticación desde localStorage.
   const getToken = () => localStorage.getItem('token');

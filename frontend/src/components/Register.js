@@ -24,15 +24,15 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Limpiar errores previos al iniciar un nuevo envío
-    setMessage(''); // Limpiar mensajes previos al iniciar un nuevo envío
+    setError(''); 
+    setMessage(''); 
 
     const payload = {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      first_name: formData.name, // Asegúrate que el backend espera 'first_name'
-      last_name: formData.surname  // Asegúrate que el backend espera 'last_name'
+      first_name: formData.name, 
+      last_name: formData.surname  
     };
 
     if (formData.password.length < 6) {
@@ -44,16 +44,13 @@ const Register = () => {
       // eslint-disable-next-line no-unused-vars
       const response = await axios.post('http://localhost:3000/api/users/register', payload);
       setMessage('¡Registro exitoso! Redirigiendo al login...');
-      setFormData({ username: '', email: '', password: '', name: '', surname: '' }); // Limpiar formulario
+      setFormData({ username: '', email: '', password: '', name: '', surname: '' }); 
       setTimeout(() => {
         navigate('/login');
-      }, 2000); // Retraso para que el usuario vea el mensaje
+      }, 2000); 
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
-        // No se establece ningún error aquí.
-        // Esto significa que cualquier mensaje de error proveniente de err.response.data.message
-        // (incluyendo "username repetido" u otros errores de validación del backend)
-        // no se mostrará al usuario.
+        setError(err.response.data.message); // Mostrar error del backend
       } else if (err.request) {
         setError('No se pudo conectar al servidor. Verifica tu conexión.');
       } else {
@@ -62,12 +59,12 @@ const Register = () => {
     }
   };
 
-  // Clases de Tailwind para los inputs y el botón del formulario
-  const formInputClasses = "block w-full my-2 p-2 border-none rounded-[5px] bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400";
-  const formButtonClasses = "mt-4 w-full p-[0.6rem] bg-white border-none rounded-[5px] text-black font-bold cursor-pointer hover:bg-[#708090] hover:text-white transition-colors duration-150 ease-in-out";
+  // Clases de Tailwind para los inputs y el botón del formulario, con estilos actualizados
+  const formInputClasses = "block w-full my-2 p-2 border-none rounded-[5px] bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-slate-500";
+  const formButtonClasses = "mt-4 w-full p-[0.6rem] bg-slate-800 text-white border-none rounded-[5px] font-bold cursor-pointer hover:bg-slate-700 transition-colors duration-150 ease-in-out";
 
   return (
-    <Estilo> {/* Usa el layout general Estilo.js */}
+    <Estilo> 
       <div className="bg-[#778899]/60 p-8 rounded-[10px] text-center w-full max-w-[350px] sm:max-w-[400px] shadow-xl mx-auto">
         <h2 className="text-3xl font-semibold text-white mb-6 [text-shadow:1px_1px_2px_rgba(0,0,0,0.4)]">
           Crear Cuenta
@@ -142,7 +139,11 @@ const Register = () => {
 
         <p className="mt-6 text-sm text-white">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="font-semibold text-blue-200 hover:text-blue-100 hover:underline transition-colors duration-150 ease-in-out">
+          {/* Enlace "Inicia sesión" con el nuevo color de texto */}
+          <Link 
+            to="/login" 
+            className="font-semibold text-slate-800 hover:text-slate-600 hover:underline transition-colors duration-150 ease-in-out"
+          >
             Inicia sesión
           </Link>
         </p>
