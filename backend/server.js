@@ -15,6 +15,7 @@ const userRoutes = require('./routes/userRoutes');
 const calendarioRoutes = require('./routes/calendarioRoutes');
 const datosRoutes = require('./routes/datosRoutes');
 const estadisticasRoutes = require('./routes/estadisticasRoutes'); 
+const prediccionesRoutes = require('./routes/prediccionesRoutes'); 
 
 const port = 3000; // Puerto donde se ejecutará el servidor
 
@@ -71,7 +72,7 @@ app.use('/api', calendarioRoutes);
 // Las rutas en datosRoutes usarán la instancia 'client' importada directamente si es necesario
 app.use('/api', datosRoutes);
 app.use('/api', estadisticasRoutes);  
-
+app.use('/api', prediccionesRoutes);
 // Inicia el servidor en el puerto definido
 app.listen(port, () => {
   console.log(`Servidor backend corriendo en http://localhost:${port}`);

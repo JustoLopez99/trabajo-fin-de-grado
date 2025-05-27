@@ -2,7 +2,6 @@
 import React from 'react';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 
-// El helper noDataMsg puede vivir aquí o ser importado si es más genérico
 const noDataMsg = (chartName) => (
   <div className="bg-white p-6 rounded-xl shadow-xl flex items-center justify-center h-[350px] sm:h-[450px] md:h-[500px]">
     <p className="text-slate-500 text-center">No hay datos para '{chartName}' con filtros actuales.</p>
@@ -11,7 +10,7 @@ const noDataMsg = (chartName) => (
 
 const CuadriculaGraficos = ({ statsData, chartOptionsBase }) => {
   if (!statsData) {
-    return null; // O un mensaje indicando que no hay datos para los gráficos principales
+    return null; 
   }
 
   return (

@@ -1,7 +1,7 @@
 // backend/controllers/estadisticasController.js
 const pool = require('../db/db');
 
-// Colores para gráficos (puedes expandir esta lista o moverla a un archivo de constantes)
+// Colores para gráficos
 const CHART_COLORS_RGBA = [
   'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)',
   'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)',
@@ -61,7 +61,7 @@ exports.getDashboardStats = async (req, res) => {
       ]
     };
 
-    // 2. Rendimiento (Engagement Rate %) por Tipo de Post (ignora filtro tipo_post)
+    // 2. Rendimiento (Engagement Rate %) por Tipo de Post 
     const performanceByPostTypeQuery = `
       SELECT tipo_post, COALESCE(AVG(engagement_rate) * 100, 0) AS engagement_rate_avg_percent
       ${baseQueryFrom}
@@ -79,7 +79,7 @@ exports.getDashboardStats = async (req, res) => {
       }]
     };
     
-    // KPIs Generales (con filtro tipo_post)
+    // KPIs Generales 
     const kpiQuery = `
       SELECT
         SUM(impresiones) AS total_kpi_impressions,
@@ -91,7 +91,7 @@ exports.getDashboardStats = async (req, res) => {
     const kpiResult = await pool.query(kpiQuery, filteredQueryParams);
     const kpis = kpiResult.rows[0] || {};
 
-    // 3. Distribución de Publicaciones por tipo_post (Circular - ignora filtro tipo_post)
+    // 3. Distribución de Publicaciones por tipo_post 
     const postTypeDistributionQuery = `
       SELECT tipo_post, COUNT(*) AS cantidad_publicaciones
       ${baseQueryFrom}
@@ -108,7 +108,7 @@ exports.getDashboardStats = async (req, res) => {
       }]
     };
 
-    // 4. Tiempo de Retención Promedio por tipo_post (Barras - ignora filtro tipo_post)
+    // 4. Tiempo de Retención Promedio por tipo_post
     const avgRetentionTimeQuery = `
       SELECT tipo_post, COALESCE(AVG(tiempo_retencion), 0) AS retencion_promedio
       ${baseQueryFrom} AND tiempo_retencion IS NOT NULL AND tiempo_retencion > 0
@@ -126,7 +126,7 @@ exports.getDashboardStats = async (req, res) => {
       }]
     };
     
-    // 5. Variación de Impresiones a lo Largo del Tiempo (Línea - con filtro tipo_post)
+    // 5. Variación de Impresiones a lo Largo del Tiempo 
     const impressionsOverTimeQuery = `
       SELECT TO_CHAR(fecha_publicacion, 'YYYY-MM-DD') AS date_str, SUM(impresiones) AS total_impressions
       ${filteredQueryFrom}
@@ -145,7 +145,7 @@ exports.getDashboardStats = async (req, res) => {
       }]
     };
 
-    // 6. Engagement Rate Promedio por Día de la Semana (Barras - con filtro tipo_post)
+    // 6. Engagement Rate Promedio por Día de la Semana 
     const engagementByDayOfWeekQuery = `
       SELECT
         EXTRACT(ISODOW FROM fecha_publicacion) AS num_dia_semana,
